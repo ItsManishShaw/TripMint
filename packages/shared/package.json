@@ -1,0 +1,14 @@
+{
+  "name": "@travel/shared",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./schemas": "./src/schemas.ts",
+    "./money": "./src/money.ts",
+    "./mock": "./src/mock.ts"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  }
+}

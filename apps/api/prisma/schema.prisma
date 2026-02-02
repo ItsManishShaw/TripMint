@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Cart {
+  id             String      @id
+  status         String
+  convenienceFee Int
+  appliedOfferId String?
+  userId         String?
+  lockExpiresAt  DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  item           CartItem?
+  travellers     Traveller[]
+  bookings       Booking[]
+  payments       Payment[]
+  user           User?       @relation(fields: [userId], references: [id])
+}
+
+model CartItem {
+  id       String @id @default(uuid())
+  cartId   String @unique
+  flightId String
+  cart     Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  flight   Flight @relation(fields: [flightId], references: [id])
+}
+
+model Traveller {
+  id        String @id @default(uuid())
+  cartId    String
+  firstName String
+  lastName  String
+  gender    String
+  cart      Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+}
+
+model Booking {
+  id        String   @id
+  cartId    String
+  userId    String?
+  status    String
+  totalPaid Int
+  createdAt DateTime @default(now())
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
+}
+
+model Flight {
+  id           String    @id
+  from         String
+  to           String
+  departTimeISO String
+  arriveTimeISO String
+  airline      String
+  flightNo     String
+  durationMins Int
+  baseFare     Int
+  taxesAndFees Int
+  seatsAvailable Int       @default(0)
+  cartItems    CartItem[]
+}
+
+model Offer {
+  id           String @id
+  title        String
+  provider     String
+  channel      String
+  discountType String
+  flatOff      Int?
+  percentOff   Float?
+  maxCap       Int?
+  minTxn       Int?
+  validTillISO String
+  priority     Int    @default(0)
+}
+
+model User {
+  id           String    @id
+  email        String    @unique
+  name         String?
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  carts        Cart[]
+  bookings     Booking[]
+  payments     Payment[]
+}
+
+model Payment {
+  id          String   @id
+  cartId      String
+  userId      String
+  amount      Int
+  currency    String
+  status      String
+  provider    String
+  providerRef String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  cart        Cart     @relation(fields: [cartId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+}
